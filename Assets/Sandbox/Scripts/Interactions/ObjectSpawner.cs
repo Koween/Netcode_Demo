@@ -7,7 +7,7 @@ using Unity.Mathematics;
 public class ObjectSpawner : NetworkBehaviour
 {
     [SerializeField] private bool _syncInstance;
-    [SerializeField] private GameObject _newGameObject;
+    [SerializeField] private GameObject _newGameObject, _currentPlayer;
     [SerializeField] private Transform _spawnPoint;
 
     public void OnTriggerEnter(Collider collider)
@@ -16,28 +16,56 @@ public class ObjectSpawner : NetworkBehaviour
         if(!collider.CompareTag("Player")) return;
         if(_syncInstance)
          {
-                Debug.Log("TriggerEnter player");
-               SpawnGameObjectServerRPC();}
+            if(IsOwnedByServer)
+               SpawnOneGameObjectForAllClientsServerRpc();
+        }
         else
             {
-                
-                SpawnLocalGameObjectInstance();
+                ulong clientId = collider.GetComponent<NetworkObject>().OwnerClientId;
+                ClientRpcParams clientRpcParams = new ClientRpcParams
+                {
+                    Send = new ClientRpcSendParams
+                    {
+                        TargetClientIds = new ulong[] { clientId }
+                    }
+                };
+                _currentPlayer = collider.gameObject;
+                SpawnLocalGameObjectInstanceClientRPC(clientRpcParams);
             }
             
 
     }
 
     [ServerRpc(RequireOwnership = false)]
-    public void SpawnGameObjectServerRPC()
+    public void SpawnOneGameObjectForEveryClientServerRpc()
     {
        NetworkObject networkObject = Instantiate(_newGameObject, _spawnPoint.position, quaternion.identity).GetComponent<NetworkObject>();
        networkObject.Spawn(true);
     }
 
-    //Este código solo se ejecuta del lado del server
-    private void SpawnLocalGameObjectInstance()
+    /*//[ServerRpc(RequireOwnership = false)]
+    public void SpawnOneGameObjectForAllClients(Transform player)
     {
-        if(IsOwner)
-        Instantiate(_newGameObject, _spawnPoint.position, quaternion.identity);
+        NetworkObject networkObject = Instantiate(_newGameObject, _spawnPoint.position, quaternion.identity).GetComponent<NetworkObject>();
+        //Debug.Log(networkObject.TrySetParent(player));
+        networkObject.setp
+    }*/
+
+    //[ServerRpc(RequireOwnership = false)]
+    [ServerRpc]
+    public void SpawnOneGameObjectForAllClientsServerRpc()
+    {
+        NetworkObject networkObject = Instantiate(_newGameObject, _spawnPoint.position, quaternion.identity).GetComponent<NetworkObject>();
+        networkObject.Spawn(true);
     }
+
+    //Just in the specified clients in the clientParams
+    [ClientRpc]
+    private void SpawnLocalGameObjectInstanceClientRPC( ClientRpcParams clientRpcParams = default)
+    {
+      GameObject Instance =  Instantiate(_newGameObject, _spawnPoint.position, quaternion.identity);
+      Instance.transform.SetParent(_currentPlayer.transform);
+    }
+
+    
 }
