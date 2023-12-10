@@ -10,9 +10,8 @@ public class Player : NetworkBehaviour
 
     private Rigidbody rb;
 
-    void Awake()
+    void Start()
     {
-        rb = GetComponent<Rigidbody>();
     }
 
     void Update()
