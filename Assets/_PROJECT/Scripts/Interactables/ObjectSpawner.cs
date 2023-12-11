@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using Unity.Mathematics;
+using TMPro;
 
 public class ObjectSpawner : NetworkBehaviour
 {
@@ -11,6 +12,9 @@ public class ObjectSpawner : NetworkBehaviour
     [SerializeField] private bool _setSpawnedObjAsPlayerChild;
     [SerializeField] private GameObject _objPrefab, _currentPlayer;
     [SerializeField] private Transform _spawnPoint;
+    [SerializeField] private GameObject _messageContainer;
+    [SerializeField] private TextMeshProUGUI _messageTextMesh;
+    [SerializeField] private string _message = "Press E to interact";
 
     /*if you delete IsOwner conditional will appear a GameObject Instance for every client conected
     due that code will execute in all clients.
@@ -20,79 +24,80 @@ public class ObjectSpawner : NetworkBehaviour
 
     public void OnTriggerEnter(Collider collider)
     {
+        if(!collider.CompareTag("Player")) return;
+        ulong clientId = collider.GetComponent<NetworkObject>().OwnerClientId;
+        ClientRpcParams clientRpcParams = 
+            NetworkSessionsManager.Instance.configureClientParams(new ulong[] {clientId});
+        SetUIMessageClientRpc(true, clientRpcParams);
+    }
+
+    public void OnTriggerExit(Collider collider)
+    {
+        if(!collider.CompareTag("Player")) return;
+        ulong clientId = collider.GetComponent<NetworkObject>().OwnerClientId;
+        ClientRpcParams clientRpcParams = 
+            NetworkSessionsManager.Instance.configureClientParams(new ulong[] {clientId});
+        SetUIMessageClientRpc(false, clientRpcParams);
+    }
+
+    public void OnTriggerStay(Collider collider)
+    {
 
         if(!collider.CompareTag("Player")) return;
         _currentPlayer = collider.gameObject;
-        if(Input.GetKey(KeyCode.E))
+        if(Input.GetKeyDown(KeyCode.E))
         {
             if(_syncInstance)
             {
-
-
-                if(IsOwner)
+                Debug.Log("try sync spawn");
                 SpawnOneGameObjectForAllClientsServerRpc();
             }
             else
             {
                 ulong clientId = collider.GetComponent<NetworkObject>().OwnerClientId;
-                ClientRpcParams clientRpcParams = new ClientRpcParams
-                {
-                    Send = new ClientRpcSendParams
-                    {
-                        TargetClientIds = new ulong[] { clientId }
-                    }
-                };
-                SpawnLocalGameObjectInstanceClientRPC(clientRpcParams);
+                ClientRpcParams clientRpcParams = 
+                    NetworkSessionsManager.Instance.configureClientParams(new ulong[] {clientId});
+                SpawnGameObjectForSpecificClientRPC(clientRpcParams);
 
             }
         }
     }
 
-    [ServerRpc]
+    [ClientRpc]
+    private void SetUIMessageClientRpc(bool show, ClientRpcParams clientRpcParams)
+    {
+        _messageTextMesh.text = _message;
+        _messageContainer.SetActive(show);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
     public void SpawnOneGameObjectForAllClientsServerRpc()
     {
-        Debug.Log("SPAWN");
         Debug.Log(gameObject.GetComponent<NetworkObject>().OwnerClientId);
         NetworkObject networkObject = Instantiate(_objPrefab, _spawnPoint.position, quaternion.identity).GetComponent<NetworkObject>();
         networkObject.Spawn(true);
         if(_setSpawnedObjAsPlayerChild)
         {
-            networkObject.TrySetParent(_currentPlayer);
-            Vector3 objPosition = _currentPlayer.transform.position;
-            objPosition.x += 0.5f;
-            networkObject.transform.position = objPosition;
+            SetWeaponPositionClientRpc(networkObject);
         }
-
     }
 
-    //Just in the specified clients in the clientParams
     [ClientRpc]
-    private void SpawnLocalGameObjectInstanceClientRPC(ClientRpcParams clientRpcParams = default)
+    private void SetWeaponPositionClientRpc(NetworkObjectReference weaponReference)
+    {
+        weaponReference.TryGet(out NetworkObject networkObject);
+        networkObject.TrySetParent(_currentPlayer);
+        Vector3 objPosition = _currentPlayer.transform.position;
+        objPosition.x += 0.5f;
+        networkObject.transform.position = objPosition;
+    }
+
+    //Spawns obj just for the specified clients in the clientParams
+    [ClientRpc]
+    private void SpawnGameObjectForSpecificClientRPC(ClientRpcParams clientRpcParams = default)
     {
         GameObject Instance = Instantiate(_objPrefab, _spawnPoint.position, quaternion.identity);
         //Instance.transform.SetParent(_currentPlayer.transform);
     }
-
-    /*[ServerRpc]
-    public void SpawnOneGameObjectForAllClientsServerRpc()
-    {
-        NetworkObject networkObject = Instantiate(_newGameObject, _spawnPoint.position, quaternion.identity).GetComponent<NetworkObject>();
-        networkObject.Spawn(true);
-        networkObject.TrySetParent(_currentPlayer);
-        //Vector3 objPosition = _currentPlayer.transform.position;
-        //objPosition.z += 0.5f; 
-        //networkObject.transform.position = objPosition;
-        SetSpawnedObjectPositionClientRPC(networkObject);
-    }
-
-    [ClientRpc]
-    private void SetSpawnedObjectPositionClientRPC(NetworkObjectReference objectReference)
-    {
-        objectReference.TryGet(out NetworkObject obj);
-        Vector3 objPosition = _currentPlayer.transform.position;
-        objPosition.z += 0.5f; 
-        obj.transform.position = objPosition;
-    }
-    */
 
 }

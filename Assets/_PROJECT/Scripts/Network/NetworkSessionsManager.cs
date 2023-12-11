@@ -44,6 +44,14 @@ public class NetworkSessionsManager : NetworkBehaviour
         }
     }
 
-    
+    public ClientRpcParams configureClientParams(ulong[] clientsId)
+    {
+                ClientRpcParams clientRpcParams = new ClientRpcParams
+                {
+                    Send = new ClientRpcSendParams
+                    { TargetClientIds = clientsId }
+                };
+                return clientRpcParams;
+    }
     
 }

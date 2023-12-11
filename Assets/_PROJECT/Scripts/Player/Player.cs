@@ -19,11 +19,11 @@ public class Player : NetworkBehaviour
     {
         if(!IsOwner) return;
         HandleMovement();
-        if(Input.GetKeyDown(KeyCode.E))
+        /*if(Input.GetKeyDown(KeyCode.E))
         {
-            if(!weapon && !IsHoldingObj)
+            if(weapon && !IsHoldingObj)
             weapon.GetComponent<NetworkObject>().Despawn(true);
-        }
+        }*/
     }
 
     public void HandleMovement()

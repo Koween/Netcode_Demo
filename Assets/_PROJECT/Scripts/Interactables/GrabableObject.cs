@@ -10,6 +10,7 @@ public class GrabableObject : NetworkBehaviour
 
     [SerializeField] private Transform _currentParent;
     [SerializeField] private bool _followParent;
+    private float _zOffsetPosition = .5f;
 
     private void OnTriggerStay(Collider collider)
     {
@@ -49,7 +50,9 @@ public class GrabableObject : NetworkBehaviour
     
     private void FollowParent()
     {
-        transform.position = _currentParent.transform.position;
+        Vector3 objPosition = _currentParent.transform.position;
+        objPosition.z += _zOffsetPosition;
+        transform.position = objPosition;
     }
     
 /*
