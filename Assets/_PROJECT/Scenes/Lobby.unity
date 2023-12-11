@@ -1399,6 +1399,7 @@ GameObject:
   - component: {fileID: 5918531334757984054}
   - component: {fileID: 3182566680996500583}
   - component: {fileID: 8919630659411666487}
+  - component: {fileID: 8919630659411666488}
   m_Layer: 0
   m_Name: NetworkSessionManager
   m_TagString: Untagged
@@ -1434,6 +1435,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _requiredPlayers: 2
+--- !u!114 &8919630659411666488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6259514639958247301}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b19cbc90cb480bd43a799c5ded857696, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

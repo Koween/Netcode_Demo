@@ -17,14 +17,14 @@ public class UILobby : MonoBehaviour
     public void OnCreateRoom()
     {
         Debug.Log("Joining as host");
-        NetworkPlayersManager.Instance.JoinPlayerAsHost();
+        LobbyManager.Instance.CreateLobby("LobbyName", false);
         transform.parent.gameObject.SetActive(false);
     }
 
     public void OnJoinRoom()
     {
         Debug.Log("Joining as guest");
-        NetworkPlayersManager.Instance.JoinPlayerAssGuest();
+        LobbyManager.Instance.QuickJoin();
         transform.parent.gameObject.SetActive(false);
     }
 }

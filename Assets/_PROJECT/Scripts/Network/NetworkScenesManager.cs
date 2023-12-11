@@ -13,7 +13,7 @@ public class NetworkScenesManager : NetworkBehaviour
         if(Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(this);
+            DontDestroyOnLoad(gameObject);
             return;
         }
         Destroy(this);
@@ -32,6 +32,17 @@ public class NetworkScenesManager : NetworkBehaviour
                         $"with a {nameof(SceneEventProgressStatus)}: {status}");
             }
         }
+    }
+
+    public void ReturnToMainMenu(ulong clientId)
+    {
+        NetworkManager.Singleton.DisconnectClient(clientId);
+    }
+
+    public void DisconectAllPlayers()
+    {
+        NetworkManager.Singleton.Shutdown();
+        SceneManager.LoadScene("MainMenu");
     }
 
     //Todo: Crear clase para gestionar params

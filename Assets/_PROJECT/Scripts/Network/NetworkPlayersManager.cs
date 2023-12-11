@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class NetworkPlayersManager : NetworkBehaviour
 {
@@ -11,7 +12,8 @@ public class NetworkPlayersManager : NetworkBehaviour
     public int RequiredPlayers { get => _requiredPlayers;}
 
     private NetworkVariable<int> _playersInGame = new NetworkVariable<int>();
-
+    private NetworkVariable<bool> _gameAlreadyStart = new NetworkVariable<bool>();
+    public bool GameAlreadyStart { get => _gameAlreadyStart.Value; set => _gameAlreadyStart.Value = value;}
     public int PlayersInGame { get => _playersInGame.Value; }
 
     void Awake()
@@ -19,7 +21,7 @@ public class NetworkPlayersManager : NetworkBehaviour
         if(Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(this);
+            DontDestroyOnLoad(gameObject);
             
             return;
             
@@ -43,8 +45,18 @@ public class NetworkPlayersManager : NetworkBehaviour
 
         NetworkManager.Singleton.OnClientDisconnectCallback += (id) =>
         {
-            if(IsServer) _playersInGame.Value--;
+            if(IsServer) OnPlayerDisconect(id); 
         }; 
+    }
+
+    public void OnPlayerDisconect(ulong clientId)
+    {
+        _playersInGame.Value--;
+        if(_gameAlreadyStart.Value || clientId == NetworkManager.ServerClientId) 
+        {
+            //Todo: show UI message ("conection error")
+            NetworkScenesManager.Instance.DisconectAllPlayers();
+        }
     }
 
     public void JoinPlayerAsHost()
