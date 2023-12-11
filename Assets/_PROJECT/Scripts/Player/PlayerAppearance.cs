@@ -9,7 +9,8 @@ public class PlayerAppearance : NetworkBehaviour
 
     private Material _material;
 
-    public void ChangePlayerColor(Color newColor)
+    [ClientRpc]
+    public void ChangePlayerColorClientRpc(Color newColor)
     {
         _material = new Material(_playerMeshRender.material);
         _playerMeshRender.material = _material;

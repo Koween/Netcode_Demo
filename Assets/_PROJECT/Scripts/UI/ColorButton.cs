@@ -12,24 +12,26 @@ public class ColorButton : NetworkBehaviour
     {
         _newColor = GetComponent<Image>().color;
         GetComponent<Button>().onClick.AddListener(OnPress);
-
     }
 
     public void OnPress()
     {
-        
-       // ChangeClientColorClientRpc(NetworkManager.LocalClient.PlayerObject);
-       NetworkManager.LocalClient.PlayerObject
-       .GetComponent<PlayerAppearance>().ChangePlayerColor(_newColor);
+        ChangeClientColorServerRpc(NetworkManager.LocalClient.ClientId);
     }
-    
 
-/*
+    [ServerRpc(RequireOwnership = false)]
+    private void ChangeClientColorServerRpc(ulong clientId)
+    {
+        NetworkObject playerObject = NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject;
+        playerObject.GetComponent<PlayerAppearance>().ChangePlayerColorClientRpc(_newColor);
+        ChangeClientColorClientRpc(playerObject);
+    }
+
     [ClientRpc]
     private void ChangeClientColorClientRpc(NetworkObjectReference player)
     {
-        player.TryGet(out NetworkObject playerNObj);
-        playerNObj.GetComponent<PlayerAppearance>().ChangePlayerColor(_newColor);
+        player.TryGet(out NetworkObject playerNobj);
+       playerNobj.GetComponent<PlayerAppearance>().ChangePlayerColorClientRpc(_newColor);
     }
-*/
+
 }

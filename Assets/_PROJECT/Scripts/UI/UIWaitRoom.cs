@@ -8,8 +8,15 @@ using UnityEngine.UI;
 public class UIWaitRoom : NetworkBehaviour
 {
     [SerializeField] private TextMeshProUGUI _joindePlayersText;
+    [SerializeField] private Button _playGameButton;
 
-   [ServerRpc]
+    void Awake()
+    {
+        _playGameButton.onClick.AddListener(LoadGameSceneServerRpc);
+        _playGameButton.interactable = false;
+    }
+
+   [ServerRpc(RequireOwnership = false)]
     private void LoadGameSceneServerRpc()
     {
         NetworkScenesManager.Instance.LoadScene("GameScene");
@@ -37,7 +44,7 @@ public class UIWaitRoom : NetworkBehaviour
         _joindePlayersText.text = $"Joined players {currentPlayers}/{requiredPlayers}";
         if(currentPlayers == requiredPlayers && IsOwner)
         {
-            LoadGameSceneServerRpc();
+            _playGameButton.interactable = true;
         }
     }
 }

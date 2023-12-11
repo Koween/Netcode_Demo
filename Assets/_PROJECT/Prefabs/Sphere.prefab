@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 6407978480561705390}
   - component: {fileID: 2707606901047663913}
   - component: {fileID: 4448628718000088327}
+  - component: {fileID: -7768359781651665944}
   - component: {fileID: -6861630195978720054}
   m_Layer: 0
   m_Name: Sphere
@@ -165,6 +166,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 5
   rotationSpeed: 180
+--- !u!114 &-7768359781651665944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6375614493825382777}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d087d6ec334c0df498ccce884196a049, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerMeshRender: {fileID: 9144647098652767516}
 --- !u!54 &-6861630195978720054
 Rigidbody:
   m_ObjectHideFlags: 0
