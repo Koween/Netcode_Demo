@@ -6,28 +6,33 @@ using Unity.Mathematics;
 
 public class ObjectSpawner : NetworkBehaviour
 {
+    //if syncInstance is true the object will appear foar all players else it will appear localy
     [SerializeField] private bool _syncInstance;
-    [SerializeField] private GameObject _newGameObject, _currentPlayer;
+    [SerializeField] private bool _setSpawnedObjAsPlayerChild;
+    [SerializeField] private GameObject _objPrefab, _currentPlayer;
     [SerializeField] private Transform _spawnPoint;
-    [SerializeField] private TextMesh _debugger;
+
+    /*if you delete IsOwner conditional will appear a GameObject Instance for every client conected
+    due that code will execute in all clients.
+    In this case due that the Owner of this spawner is the server it will just be executed in the server side.
+    If you want to let players to execute this besides to take out the conditionl you must use the param owner required
+    as false */
 
     public void OnTriggerEnter(Collider collider)
     {
-       
+
         if(!collider.CompareTag("Player")) return;
         _currentPlayer = collider.gameObject;
-        if(_syncInstance)
-         {
-            //if you delete IsOwner conditional will appear a GameObject Instance for every client conected
-            //due that code will execute in all clients.
-            //In this case due that the Owner of this spawner is the server it will just be executed in the server side.
-            //If you want to let players to execute this besides to take out the conditionl you must use the param owner required
-            //as false
-            
-            if(IsOwner)
-               SpawnOneGameObjectForAllClientsServerRpc();
-        }
-        else
+        if(Input.GetKey(KeyCode.E))
+        {
+            if(_syncInstance)
+            {
+
+
+                if(IsOwner)
+                SpawnOneGameObjectForAllClientsServerRpc();
+            }
+            else
             {
                 ulong clientId = collider.GetComponent<NetworkObject>().OwnerClientId;
                 ClientRpcParams clientRpcParams = new ClientRpcParams
@@ -37,11 +42,10 @@ public class ObjectSpawner : NetworkBehaviour
                         TargetClientIds = new ulong[] { clientId }
                     }
                 };
-                //SpawnLocalGameObjectInstanceClientRPC(clientRpcParams);
-                SpawnLocalGameObjectInstance();
-            }
-            
+                SpawnLocalGameObjectInstanceClientRPC(clientRpcParams);
 
+            }
+        }
     }
 
     [ServerRpc]
@@ -49,12 +53,24 @@ public class ObjectSpawner : NetworkBehaviour
     {
         Debug.Log("SPAWN");
         Debug.Log(gameObject.GetComponent<NetworkObject>().OwnerClientId);
-        NetworkObject networkObject = Instantiate(_newGameObject, _spawnPoint.position, quaternion.identity).GetComponent<NetworkObject>();
+        NetworkObject networkObject = Instantiate(_objPrefab, _spawnPoint.position, quaternion.identity).GetComponent<NetworkObject>();
         networkObject.Spawn(true);
-        //networkObject.TrySetParent(_currentPlayer);
-       // Vector3 objPosition = _currentPlayer.transform.position;
-       // objPosition.z += 0.5f;
-       // networkObject.transform.position = objPosition;
+        if(_setSpawnedObjAsPlayerChild)
+        {
+            networkObject.TrySetParent(_currentPlayer);
+            Vector3 objPosition = _currentPlayer.transform.position;
+            objPosition.x += 0.5f;
+            networkObject.transform.position = objPosition;
+        }
+
+    }
+
+    //Just in the specified clients in the clientParams
+    [ClientRpc]
+    private void SpawnLocalGameObjectInstanceClientRPC(ClientRpcParams clientRpcParams = default)
+    {
+        GameObject Instance = Instantiate(_objPrefab, _spawnPoint.position, quaternion.identity);
+        //Instance.transform.SetParent(_currentPlayer.transform);
     }
 
     /*[ServerRpc]
@@ -79,18 +95,4 @@ public class ObjectSpawner : NetworkBehaviour
     }
     */
 
-    //Just in the specified clients in the clientParams
-    /*[ClientRpc]
-    private void SpawnLocalGameObjectInstanceClientRPC( ClientRpcParams clientRpcParams = default)
-    {
-      GameObject Instance =  Instantiate(_newGameObject, _spawnPoint.position, quaternion.identity);
-      //Instance.transform.SetParent(_currentPlayer.transform);
-    }*/
-
-    private void SpawnLocalGameObjectInstance()
-    {
-      GameObject Instance =  Instantiate(_newGameObject, _spawnPoint.position, quaternion.identity);
-    }
-
-    
 }

@@ -7,17 +7,23 @@ public class Player : NetworkBehaviour
 {
     public float speed = 5.0f;
     public float rotationSpeed = 180.0f;
-
-    private Rigidbody rb;
+    private GameObject weapon;
+    public bool IsHoldingObj {get; set;}
 
     void Start()
     {
+        
     }
 
     void Update()
     {
         if(!IsOwner) return;
         HandleMovement();
+        if(Input.GetKeyDown(KeyCode.E))
+        {
+            if(!weapon && !IsHoldingObj)
+            weapon.GetComponent<NetworkObject>().Despawn(true);
+        }
     }
 
     public void HandleMovement()
