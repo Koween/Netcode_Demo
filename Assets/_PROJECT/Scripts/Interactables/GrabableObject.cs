@@ -5,22 +5,17 @@ using Unity.Netcode;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 
-public class GrabableObject : NetworkBehaviour
+public class GrabableObject : OnTriggerInteractableObj
 {
-
     [SerializeField] private Transform _currentParent;
-    [SerializeField] private bool _followParent;
     private float _zOffsetPosition = .5f;
 
     private void OnTriggerStay(Collider collider)
     {
-        
         if(collider.CompareTag("Player") && Input.GetKeyDown(KeyCode.E))
         {
-            Debug.Log(collider.name);
-            Debug.Log(collider.tag);
+            if(_currentParent != collider.gameObject)
             SetCurrentParentServerRpc(collider.transform.GetComponent<NetworkObject>());
-            
         }
     }
 
@@ -35,14 +30,13 @@ public class GrabableObject : NetworkBehaviour
     {
         player.TryGet(out NetworkObject obj);
         _currentParent = obj.transform;
-        _followParent = true;
     }
 
 
     //The grabable object must have a clientnetwork transform in order to work 
     void Update()
     {
-        if(_followParent)
+        if(_currentParent)
         FollowParent();
         
     }
@@ -51,7 +45,7 @@ public class GrabableObject : NetworkBehaviour
     private void FollowParent()
     {
         Vector3 objPosition = _currentParent.transform.position;
-        objPosition.z += _zOffsetPosition;
+        objPosition += _currentParent.transform.forward * _zOffsetPosition;
         transform.position = objPosition;
     }
     
