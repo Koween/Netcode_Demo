@@ -1,22 +1,43 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIWaitRoom : MonoBehaviour
+public class UIWaitRoom : NetworkBehaviour
 {
-    [SerializeField] private Button _startGameButton;
+    [SerializeField] private TextMeshProUGUI _joindePlayersText;
 
-    public void Awake()
+   [ServerRpc]
+    private void LoadGameSceneServerRpc()
     {
-        _startGameButton.onClick.AddListener(LoadGameScene);
+        NetworkScenesManager.Instance.LoadScene("GameScene");
+        gameObject.SetActive(false);
+        
     }
 
-   
-    private void LoadGameScene()
+    private void Update()
     {
-        NetworkSessionsManager.Instance.LoadScene("GameScene");
-        
+        if(IsOwner)
+        UpdateConectedPlayersTextServerRpc();
+    }
+
+    [ServerRpc]
+    private void UpdateConectedPlayersTextServerRpc()
+    {
+        UpdateConectedPlayersTextClientRpc();
+    }
+
+    [ClientRpc]
+    private void UpdateConectedPlayersTextClientRpc()
+    {
+        int currentPlayers = NetworkPlayersManager.Instance.PlayersInGame;
+        int requiredPlayers = NetworkPlayersManager.Instance.RequiredPlayers;
+        _joindePlayersText.text = $"Joined players {currentPlayers}/{requiredPlayers}";
+        if(currentPlayers == requiredPlayers && IsOwner)
+        {
+            LoadGameSceneServerRpc();
+        }
     }
 }

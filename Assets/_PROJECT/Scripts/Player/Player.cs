@@ -10,11 +10,7 @@ public class Player : NetworkBehaviour
     private GameObject weapon;
     public bool IsHoldingObj {get; set;}
 
-    void Start()
-    {
-        
-    }
-
+    
     void Update()
     {
         if(!IsOwner) return;

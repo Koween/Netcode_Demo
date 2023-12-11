@@ -6,16 +6,30 @@ using UnityEngine.UI;
 
 public class ColorButton : NetworkBehaviour
 {
-    [SerializeField] private Color _newColor;
+    private Color _newColor;
+    [SerializeField] private Button _colorButton;
     public void Awake()
     {
+        _newColor = GetComponent<Image>().color;
         GetComponent<Button>().onClick.AddListener(OnPress);
 
     }
 
     public void OnPress()
     {
-        //Todo: Create logic to change playerColor
+        
+       // ChangeClientColorClientRpc(NetworkManager.LocalClient.PlayerObject);
+       NetworkManager.LocalClient.PlayerObject
+       .GetComponent<PlayerAppearance>().ChangePlayerColor(_newColor);
     }
+    
 
+/*
+    [ClientRpc]
+    private void ChangeClientColorClientRpc(NetworkObjectReference player)
+    {
+        player.TryGet(out NetworkObject playerNObj);
+        playerNObj.GetComponent<PlayerAppearance>().ChangePlayerColor(_newColor);
+    }
+*/
 }

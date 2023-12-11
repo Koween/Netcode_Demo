@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,14 +17,14 @@ public class UILobby : MonoBehaviour
     public void OnCreateRoom()
     {
         Debug.Log("Joining as host");
-        NetworkSessionsManager.Instance.JoinPlayerAsHost();
+        NetworkPlayersManager.Instance.JoinPlayerAsHost();
         transform.parent.gameObject.SetActive(false);
     }
 
     public void OnJoinRoom()
     {
         Debug.Log("Joining as guest");
-        NetworkSessionsManager.Instance.JoinPlayerAssGuest();
+        NetworkPlayersManager.Instance.JoinPlayerAssGuest();
         transform.parent.gameObject.SetActive(false);
     }
 }

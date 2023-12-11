@@ -15,7 +15,7 @@ public class OnTriggerInteractableObj : NetworkBehaviour
         if(!collider.CompareTag("Player")) return;
         ulong clientId = collider.GetComponent<NetworkObject>().OwnerClientId;
         ClientRpcParams clientRpcParams = 
-            NetworkSessionsManager.Instance.configureClientParams(new ulong[] {clientId});
+            NetworkScenesManager.Instance.configureClientParams(new ulong[] {clientId});
         SetUIMessageClientRpc(true, clientRpcParams);
     }
 
@@ -24,7 +24,7 @@ public class OnTriggerInteractableObj : NetworkBehaviour
         if(!collider.CompareTag("Player")) return;
         ulong clientId = collider.GetComponent<NetworkObject>().OwnerClientId;
         ClientRpcParams clientRpcParams = 
-            NetworkSessionsManager.Instance.configureClientParams(new ulong[] {clientId});
+            NetworkScenesManager.Instance.configureClientParams(new ulong[] {clientId});
         SetUIMessageClientRpc(false, clientRpcParams);
     }
 

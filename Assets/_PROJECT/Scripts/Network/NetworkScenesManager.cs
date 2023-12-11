@@ -4,32 +4,22 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-//Handle and shares data about data related to all players like nickNames and conection states
-public class NetworkSessionsManager : NetworkBehaviour
+//Todo: change name to NetworkSceneManager
+public class NetworkScenesManager : NetworkBehaviour
 {
-    public static NetworkSessionsManager Instance {get; private set;}
+    public static NetworkScenesManager Instance {get; private set;}
     void Awake()
     {
         if(Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(this);
+            return;
         }
         Destroy(this);
     }
     
-    public void JoinPlayerAsHost()
-    {
-        NetworkManager.Singleton.OnClientConnectedCallback += (ulong clientId) => LoadScene("WaitRoom");;
-        NetworkManager.Singleton.StartHost();
-        
-    }
-
-    public void JoinPlayerAssGuest()
-    {
-        NetworkManager.Singleton.StartClient();
-    }
-
+    
     public void LoadScene(string sceneName)
     {
         
@@ -44,6 +34,7 @@ public class NetworkSessionsManager : NetworkBehaviour
         }
     }
 
+    //Todo: Crear clase para gestionar params
     public ClientRpcParams configureClientParams(ulong[] clientsId)
     {
                 ClientRpcParams clientRpcParams = new ClientRpcParams
