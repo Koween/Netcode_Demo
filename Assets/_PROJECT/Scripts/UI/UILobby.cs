@@ -1,30 +1,46 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UILobby : MonoBehaviour
 {
-    [SerializeField] private Button _createRoom, _joinRoom;
-
+    [SerializeField] private Button _createPrivateLobby;
+    [SerializeField] private Button _createPublicLobby;
+    [SerializeField] private Button _joinLobbyWithCode;
+    [SerializeField] private Button _backButton;
+    [SerializeField] private Button _quickJoinLobby;
+    [SerializeField] private TMP_InputField _lobbyNameInputField;
+    [SerializeField] private TMP_InputField _lobbyCodeInputField;
+    
     public void Awake()
     {
-        _createRoom.onClick.AddListener(OnCreateRoom);
-        _joinRoom.onClick.AddListener(OnJoinRoom);
+        _createPrivateLobby.onClick.AddListener(() => OnCreateRoom(true));
+        _createPublicLobby.onClick.AddListener(() => OnCreateRoom(false));
+        _joinLobbyWithCode.onClick.AddListener(OnJoinJoinWithCode);
+        _quickJoinLobby.onClick.AddListener(OnQuickJoin);
+        _backButton.onClick.AddListener(OnPressBackButton);
     }
 
-    public void OnCreateRoom()
+    public void OnCreateRoom(bool isPrivate)
     {
-        Debug.Log("Joining as host");
-        LobbyManager.Instance.CreateLobby("LobbyName", false);
-        transform.parent.gameObject.SetActive(false);
+        LobbyManager.Instance.CreateLobby(_lobbyNameInputField.text, isPrivate);
     }
 
-    public void OnJoinRoom()
+    public void OnJoinJoinWithCode()
     {
-        Debug.Log("Joining as guest");
+        LobbyManager.Instance.JoinWithCode(_lobbyCodeInputField.text);
+    }
+
+    public void OnQuickJoin()
+    {
         LobbyManager.Instance.QuickJoin();
-        transform.parent.gameObject.SetActive(false);
+    }
+
+    public void OnPressBackButton()
+    {
+        NetworkScenesManager.Instance.LoadScene(NetworkScenesManager.GameSecenes.MainMenu);
     }
 }

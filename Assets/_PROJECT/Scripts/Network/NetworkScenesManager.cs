@@ -2,15 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 //Todo: change name to NetworkSceneManager
 public class NetworkScenesManager : NetworkBehaviour
 {
-    public static NetworkScenesManager Instance {get; private set;}
+    public enum GameSecenes
+    {
+        WaitRoom,
+        Lobby,
+        GameScene,
+        MainMenu
+    }
+
+    public static NetworkScenesManager Instance { get; private set; }
     void Awake()
     {
-        if(Instance == null)
+        if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
@@ -18,42 +27,39 @@ public class NetworkScenesManager : NetworkBehaviour
         }
         Destroy(this);
     }
-    
-    
-    public void LoadScene(string sceneName)
+
+
+    public void LoadNetworkScene(GameSecenes scene)
     {
-        
-        if(!string.IsNullOrEmpty(sceneName))
+
+
+        var status = NetworkManager.Singleton.SceneManager.LoadScene(scene.ToString(), LoadSceneMode.Single);
+        if (status != SceneEventProgressStatus.Started)
         {
-            var status = NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
-            if (status != SceneEventProgressStatus.Started)
-            {
-                Debug.LogWarning($"Failed to load {sceneName} " +
-                        $"with a {nameof(SceneEventProgressStatus)}: {status}");
-            }
+            Debug.LogWarning($"Failed to load {scene} " +
+                    $"with a {nameof(SceneEventProgressStatus)}: {status}");
         }
+
     }
 
-    public void ReturnToMainMenu(ulong clientId)
-    {
-        NetworkManager.Singleton.DisconnectClient(clientId);
-    }
-
-    public void DisconectAllPlayers()
+    public void LoadScene(GameSecenes scene)
     {
         NetworkManager.Singleton.Shutdown();
-        SceneManager.LoadScene("MainMenu");
+        SceneManager.LoadScene(scene.ToString());
+        Destroy(NetworkManager.Singleton.gameObject);
+        Destroy(NetworkPlayersManager.Instance.gameObject);
+        Destroy(gameObject);
     }
 
     //Todo: Crear clase para gestionar params
     public ClientRpcParams configureClientParams(ulong[] clientsId)
     {
-                ClientRpcParams clientRpcParams = new ClientRpcParams
-                {
-                    Send = new ClientRpcSendParams
-                    { TargetClientIds = clientsId }
-                };
-                return clientRpcParams;
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            { TargetClientIds = clientsId }
+        };
+        return clientRpcParams;
     }
-    
+
 }

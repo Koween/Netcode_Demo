@@ -16,6 +16,7 @@ public class ColorButton : NetworkBehaviour
 
     public void OnPress()
     {
+        Debug.Log("ColorChange");
         ChangeClientColorServerRpc(NetworkManager.LocalClient.ClientId);
     }
 
