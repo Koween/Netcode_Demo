@@ -41,6 +41,7 @@ public class UILobby : MonoBehaviour
 
     public void OnPressBackButton()
     {
+         LobbyManager.Instance.LeaveLobby();
         NetworkScenesManager.Instance.LoadScene(NetworkScenesManager.GameSecenes.MainMenu);
     }
 }

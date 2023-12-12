@@ -105,14 +105,4 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
-    public async void KickPlayer(string playerId) {
-        if (IsLobbyHost()) {
-            try {
-                await LobbyService.Instance.RemovePlayerAsync(_joinedLobby.Id, playerId);
-            } catch (LobbyServiceException e) {
-                Debug.Log(e);
-            }
-        }
-    }
-
 }
